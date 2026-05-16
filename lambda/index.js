@@ -10,7 +10,7 @@ const OpenAI = require("openai").default;
 
 const PROFILES_BUCKET = "quackurfuture-profiles";
 const OUTPUTS_BUCKET  = "quackurfuture-outputs";
-const SECRET_NAME     = "quackurfuture/openai-key";
+const SECRET_NAME     = "quackurfuture/API-key";
 const REGION          = process.env.AWS_REGION || "us-east-1";
 // Pre-signed URL expiry: 1 hour
 const SIGNED_URL_TTL  = 3600;
@@ -69,7 +69,10 @@ async function getCVProfile(userId) {
  * We request a strict JSON response so parsing is deterministic.
  */
 async function tailorCVWithOpenAI(apiKey, cvProfile, jobDescription) {
-  const openai = new OpenAI({ apiKey });
+  const openai = new OpenAI({ 
+  apiKey,
+  baseURL: "https://api.deepseek.com"
+});
 
   const systemPrompt = `You are an expert career coach and CV writer.
 Your task is to rewrite a candidate's CV to best match a specific job description.
@@ -92,7 +95,7 @@ CANDIDATE CV PROFILE (JSON):
 ${JSON.stringify(cvProfile, null, 2)}`;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: "deepseek-chat",
     temperature: 0.3,
     response_format: { type: "json_object" },
     messages: [
