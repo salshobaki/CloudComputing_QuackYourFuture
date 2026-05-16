@@ -10,9 +10,9 @@ function scoreColor(score) {
 }
 
 function scoreLabel(score) {
-  if (score > 70) return 'Strong Match';
-  if (score >= 40) return 'Partial Match';
-  return 'Weak Match';
+  if (score > 70) return '🦆 Strong Match — Quack!';
+  if (score >= 40) return '🐥 Partial Match';
+  return '🥚 Weak Match';
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ function scoreLabel(score) {
 function Spinner() {
   return (
     <svg
-      className="animate-spin h-5 w-5 text-white"
+      className="animate-spin h-5 w-5 text-blue-900"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -34,10 +34,13 @@ function Spinner() {
 function LoadingSkeleton() {
   return (
     <div className="mt-10 space-y-4 animate-pulse">
-      <div className="h-4 bg-gray-200 rounded w-1/3" />
-      <div className="h-32 bg-gray-200 rounded-xl" />
-      <div className="h-4 bg-gray-200 rounded w-1/2" />
-      <div className="h-4 bg-gray-200 rounded w-2/5" />
+      <div className="h-4 bg-yellow-100 rounded w-1/3" />
+      <div className="h-32 bg-yellow-100 rounded-xl" />
+      <div className="h-4 bg-yellow-100 rounded w-1/2" />
+      <div className="h-4 bg-yellow-100 rounded w-2/5" />
+      <p className="text-center text-sm text-blue-400 font-semibold pt-2">
+        🦆 Quacking up your CV...
+      </p>
     </div>
   );
 }
@@ -49,7 +52,7 @@ function ScoreRing({ score }) {
       className={`w-36 h-36 rounded-full border-8 ${ring} flex flex-col items-center justify-center mx-auto`}
     >
       <span className={`text-4xl font-extrabold leading-none ${text}`}>{score}%</span>
-      <span className="text-xs font-medium text-gray-400 mt-1">Fit Score</span>
+      <span className="text-xs font-bold text-gray-400 mt-1">Fit Score</span>
     </div>
   );
 }
@@ -59,11 +62,11 @@ function ResultCard({ result, onReset }) {
   const label = scoreLabel(result.score);
 
   return (
-    <div className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all">
+    <div className="mt-6 bg-white rounded-2xl shadow-sm border-2 border-yellow-200 overflow-hidden transition-all">
       {/* Score header */}
       <div className={`${bg} px-6 py-8 flex flex-col items-center gap-3`}>
         <ScoreRing score={result.score} />
-        <span className={`text-sm font-semibold ${scoreText} uppercase tracking-wide`}>
+        <span className={`text-sm font-bold ${scoreText} uppercase tracking-wide`}>
           {label}
         </span>
       </div>
@@ -79,7 +82,7 @@ function ResultCard({ result, onReset }) {
             href={result.downloadUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm"
+            className="inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-blue-900 font-extrabold px-6 py-2.5 rounded-xl text-sm transition-all shadow-md hover:shadow-yellow-400/30"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11" />
@@ -89,9 +92,9 @@ function ResultCard({ result, onReset }) {
 
           <button
             onClick={onReset}
-            className="inline-flex items-center justify-center gap-2 text-gray-500 hover:text-gray-700 font-medium px-6 py-2.5 rounded-xl text-sm border border-gray-200 hover:border-gray-300 transition-colors"
+            className="inline-flex items-center justify-center gap-2 text-blue-600 hover:text-blue-900 font-semibold px-6 py-2.5 rounded-xl text-sm border-2 border-blue-200 hover:border-blue-400 transition-all"
           >
-            Try Another Job
+            🌊 Try Another Pond
           </button>
         </div>
       </div>
@@ -103,7 +106,7 @@ function ResultCard({ result, onReset }) {
 
 export default function GeneratePage() {
   const [jobDescription, setJobDescription] = useState('');
-  const [status, setStatus]   = useState('idle');   // idle | loading | success | error
+  const [status, setStatus]   = useState('idle');
   const [result, setResult]   = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -136,9 +139,11 @@ export default function GeneratePage() {
     <main className="max-w-2xl mx-auto px-4 py-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Generate CV</h1>
-        <p className="text-gray-500 mt-1 text-sm">
-          Paste a job description and we'll tailor your CV to match.
+        <h1 className="text-3xl font-extrabold text-blue-900 flex items-center gap-2">
+          <span>🐣</span> Hatch Your CV
+        </h1>
+        <p className="text-blue-500 mt-1 text-sm font-medium">
+          Paste a job description and we'll quack up a CV tailored just for you.
         </p>
       </div>
 
@@ -148,8 +153,8 @@ export default function GeneratePage() {
           status === 'success' ? 'max-h-0 opacity-0' : 'max-h-[600px] opacity-100'
         }`}
       >
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border-2 border-yellow-200 p-6">
+          <label className="block text-sm font-bold text-blue-900 mb-2">
             Job Description
           </label>
           <textarea
@@ -157,8 +162,8 @@ export default function GeneratePage() {
             onChange={(e) => setJobDescription(e.target.value)}
             disabled={status === 'loading'}
             rows={10}
-            placeholder="Paste the job description here..."
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:bg-gray-50 disabled:text-gray-400"
+            placeholder="Paste the job description here... (quack quack!)"
+            className="w-full rounded-xl border-2 border-blue-100 bg-blue-50/40 px-4 py-3 text-sm text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition disabled:bg-amber-50 disabled:text-gray-400"
           />
 
           {/* Error message */}
@@ -174,15 +179,15 @@ export default function GeneratePage() {
           <button
             type="submit"
             disabled={status === 'loading' || !jobDescription.trim()}
-            className="mt-4 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl text-sm transition-colors shadow-sm"
+            className="mt-4 w-full flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 disabled:bg-yellow-200 disabled:cursor-not-allowed text-blue-900 font-extrabold py-3 rounded-xl text-sm transition-all shadow-lg hover:shadow-yellow-400/30"
           >
             {status === 'loading' ? (
               <>
                 <Spinner />
-                Tailoring your CV...
+                Quacking up your CV...
               </>
             ) : (
-              'Generate CV'
+              '🦆 Generate CV'
             )}
           </button>
         </form>

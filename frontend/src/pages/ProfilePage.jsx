@@ -13,10 +13,13 @@ const emptyEducation = () => ({
 
 // ─── Reusable primitives ────────────────────────────────────────────────────
 
-function Card({ title, children }) {
+function Card({ title, icon, children }) {
   return (
-    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-5">{title}</h2>
+    <section className="bg-white rounded-2xl shadow-sm border border-yellow-200 p-6">
+      <h2 className="text-lg font-bold text-blue-900 mb-5 flex items-center gap-2">
+        <span className="text-xl">{icon}</span>
+        {title}
+      </h2>
       {children}
     </section>
   );
@@ -25,31 +28,31 @@ function Card({ title, children }) {
 function Field({ label, children }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-600">{label}</label>
+      <label className="text-sm font-semibold text-blue-800">{label}</label>
       {children}
     </div>
   );
 }
 
 const inputCls =
-  'rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 ' +
-  'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition';
+  'rounded-xl border-2 border-blue-100 bg-blue-50/40 px-3 py-2 text-sm text-gray-800 ' +
+  'focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition';
 
 // ─── Section components ──────────────────────────────────────────────────────
 
 function BasicInfo({ data, onChange }) {
   const set = (field) => (e) => onChange({ ...data, [field]: e.target.value });
   return (
-    <Card title="Basic Info">
+    <Card title="Basic Info" icon="🦆">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Full Name">
-          <input className={inputCls} value={data.fullName} onChange={set('fullName')} placeholder="Jane Doe" />
+          <input className={inputCls} value={data.fullName} onChange={set('fullName')} placeholder="Jane Duck" />
         </Field>
         <Field label="Job Title">
-          <input className={inputCls} value={data.jobTitle} onChange={set('jobTitle')} placeholder="Software Engineer" />
+          <input className={inputCls} value={data.jobTitle} onChange={set('jobTitle')} placeholder="Senior Quacker" />
         </Field>
         <Field label="Email">
-          <input className={inputCls} type="email" value={data.email} onChange={set('email')} placeholder="jane@example.com" />
+          <input className={inputCls} type="email" value={data.email} onChange={set('email')} placeholder="jane@pond.com" />
         </Field>
         <Field label="Phone Number">
           <input className={inputCls} type="tel" value={data.phone} onChange={set('phone')} placeholder="+1 (555) 000-0000" />
@@ -62,7 +65,7 @@ function BasicInfo({ data, onChange }) {
             rows={4}
             value={data.summary}
             onChange={set('summary')}
-            placeholder="A short professional summary..."
+            placeholder="A short professional summary... (quack!)"
           />
         </Field>
       </div>
@@ -77,25 +80,25 @@ function ExperienceSection({ items, onChange }) {
   const add = () => onChange([...items, emptyExperience()]);
 
   return (
-    <Card title="Experience">
+    <Card title="Experience" icon="💼">
       <div className="space-y-5">
         {items.map((exp, i) => (
-          <div key={exp.id} className="rounded-xl border border-gray-200 p-4 bg-gray-50 relative">
-            <span className="absolute top-3 left-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          <div key={exp.id} className="rounded-xl border-2 border-yellow-100 p-4 bg-amber-50 relative">
+            <span className="absolute top-3 left-4 text-xs font-bold text-yellow-600 uppercase tracking-wide">
               #{i + 1}
             </span>
             <button
               onClick={() => remove(exp.id)}
-              className="absolute top-3 right-4 text-xs text-red-400 hover:text-red-600 font-medium transition-colors"
+              className="absolute top-3 right-4 text-xs text-red-400 hover:text-red-600 font-semibold transition-colors"
             >
               Remove
             </button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
               <Field label="Company">
-                <input className={inputCls} value={exp.company} onChange={update(exp.id, 'company')} placeholder="Acme Corp" />
+                <input className={inputCls} value={exp.company} onChange={update(exp.id, 'company')} placeholder="Duck Corp" />
               </Field>
               <Field label="Role">
-                <input className={inputCls} value={exp.role} onChange={update(exp.id, 'role')} placeholder="Frontend Developer" />
+                <input className={inputCls} value={exp.role} onChange={update(exp.id, 'role')} placeholder="Lead Quacker" />
               </Field>
               <Field label="Start Date">
                 <input className={inputCls} type="month" value={exp.startDate} onChange={update(exp.id, 'startDate')} />
@@ -120,7 +123,7 @@ function ExperienceSection({ items, onChange }) {
       </div>
       <button
         onClick={add}
-        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+        className="mt-4 flex items-center gap-1.5 text-sm font-bold text-blue-700 hover:text-blue-900 transition-colors"
       >
         <span className="text-lg leading-none">+</span> Add Experience
       </button>
@@ -135,30 +138,30 @@ function EducationSection({ items, onChange }) {
   const add = () => onChange([...items, emptyEducation()]);
 
   return (
-    <Card title="Education">
+    <Card title="Education" icon="🎓">
       <div className="space-y-5">
         {items.map((edu, i) => (
-          <div key={edu.id} className="rounded-xl border border-gray-200 p-4 bg-gray-50 relative">
-            <span className="absolute top-3 left-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          <div key={edu.id} className="rounded-xl border-2 border-yellow-100 p-4 bg-amber-50 relative">
+            <span className="absolute top-3 left-4 text-xs font-bold text-yellow-600 uppercase tracking-wide">
               #{i + 1}
             </span>
             <button
               onClick={() => remove(edu.id)}
-              className="absolute top-3 right-4 text-xs text-red-400 hover:text-red-600 font-medium transition-colors"
+              className="absolute top-3 right-4 text-xs text-red-400 hover:text-red-600 font-semibold transition-colors"
             >
               Remove
             </button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
               <Field label="Institution">
-                <input className={inputCls} value={edu.institution} onChange={update(edu.id, 'institution')} placeholder="MIT" />
+                <input className={inputCls} value={edu.institution} onChange={update(edu.id, 'institution')} placeholder="Pond University" />
               </Field>
               <Field label="Degree">
-                <input className={inputCls} value={edu.degree} onChange={update(edu.id, 'degree')} placeholder="Bachelor of Science" />
+                <input className={inputCls} value={edu.degree} onChange={update(edu.id, 'degree')} placeholder="Bachelor of Quacking" />
               </Field>
               <Field label="Field of Study">
                 <input className={inputCls} value={edu.fieldOfStudy} onChange={update(edu.id, 'fieldOfStudy')} placeholder="Computer Science" />
               </Field>
-              <div /> {/* spacer */}
+              <div />
               <Field label="Start Date">
                 <input className={inputCls} type="month" value={edu.startDate} onChange={update(edu.id, 'startDate')} />
               </Field>
@@ -171,7 +174,7 @@ function EducationSection({ items, onChange }) {
       </div>
       <button
         onClick={add}
-        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+        className="mt-4 flex items-center gap-1.5 text-sm font-bold text-blue-700 hover:text-blue-900 transition-colors"
       >
         <span className="text-lg leading-none">+</span> Add Education
       </button>
@@ -196,7 +199,7 @@ function SkillsSection({ skills, onChange }) {
   const remove = (skill) => onChange(skills.filter((s) => s !== skill));
 
   return (
-    <Card title="Skills">
+    <Card title="Skills" icon="⚡">
       <input
         className={inputCls + ' w-full'}
         value={input}
@@ -209,12 +212,12 @@ function SkillsSection({ skills, onChange }) {
           {skills.map((skill) => (
             <span
               key={skill}
-              className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full"
+              className="inline-flex items-center gap-1.5 bg-yellow-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full border border-yellow-300"
             >
               {skill}
               <button
                 onClick={() => remove(skill)}
-                className="text-indigo-400 hover:text-indigo-700 leading-none transition-colors"
+                className="text-yellow-500 hover:text-blue-900 leading-none transition-colors"
                 aria-label={`Remove ${skill}`}
               >
                 ×
@@ -234,11 +237,9 @@ function Toast({ onDone }) {
   }, [onDone]);
 
   return (
-    <div className="fixed bottom-6 right-6 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in z-50">
-      <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-      </svg>
-      Profile saved successfully
+    <div className="fixed bottom-6 right-6 bg-blue-900 text-white text-sm font-bold px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2 animate-fade-in z-50 border-2 border-yellow-400">
+      <span className="text-yellow-400">🦆</span>
+      Profile saved successfully!
     </div>
   );
 }
@@ -253,10 +254,8 @@ export default function ProfilePage() {
   const [education, setEducation] = useState([]);
   const [skills, setSkills] = useState([]);
 
-  const [loadStatus, setLoadStatus] = useState('loading'); // 'loading' | 'done' | 'error'
+  const [loadStatus, setLoadStatus] = useState('loading');
   const [loadError, setLoadError]   = useState('');
-
-  // 'idle' | 'saving' | 'success' | 'error'
   const [saveStatus, setSaveStatus] = useState('idle');
   const [saveError, setSaveError]   = useState('');
 
@@ -294,12 +293,12 @@ export default function ProfilePage() {
   if (loadStatus === 'loading') {
     return (
       <main className="max-w-3xl mx-auto px-4 py-10 flex items-center justify-center min-h-[40vh]">
-        <div className="flex flex-col items-center gap-3 text-gray-400">
-          <svg className="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <div className="flex flex-col items-center gap-3 text-yellow-500">
+          <svg className="animate-spin h-10 w-10" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
           </svg>
-          <span className="text-sm">Loading profile...</span>
+          <span className="text-sm font-semibold text-blue-700">Fetching your feathers...</span>
         </div>
       </main>
     );
@@ -308,8 +307,10 @@ export default function ProfilePage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-        <p className="text-gray-500 mt-1 text-sm">Fill in your details to generate a tailored CV.</p>
+        <h1 className="text-3xl font-extrabold text-blue-900 flex items-center gap-2">
+          <span>🦆</span> Your Pond Profile
+        </h1>
+        <p className="text-blue-500 mt-1 text-sm font-medium">Fill in your details to hatch a tailored CV.</p>
       </div>
 
       {loadStatus === 'error' && (
@@ -340,17 +341,17 @@ export default function ProfilePage() {
         <button
           onClick={handleSave}
           disabled={saveStatus === 'saving'}
-          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-2.5 rounded-xl text-sm transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 disabled:bg-yellow-200 disabled:cursor-not-allowed text-blue-900 font-extrabold px-8 py-3 rounded-xl text-sm transition-all shadow-lg hover:shadow-yellow-400/30"
         >
           {saveStatus === 'saving' ? (
             <>
-              <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-4 w-4 text-blue-900" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
               Saving...
             </>
-          ) : 'Save Profile'}
+          ) : '🦆 Save Profile'}
         </button>
       </div>
 

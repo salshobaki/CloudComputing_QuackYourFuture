@@ -11,7 +11,7 @@ function Layout() {
   const showNav = location.pathname !== '/';
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-amber-50 text-gray-900">
       {showNav && <Navbar />}
       <Routes>
         <Route path="/" element={<AuthPage />} />

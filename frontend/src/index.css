@@ -1,3 +1,40 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes duck-bob {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-6px) rotate(-2deg); }
+  75% { transform: translateY(-3px) rotate(2deg); }
+}
+
+@keyframes wave {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes ripple-out {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-duck-bob {
+  animation: duck-bob 2.4s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.3s ease-out forwards;
+}
+
+.pond-bg {
+  background: linear-gradient(180deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%);
+}
+
+.ripple {
+  animation: ripple-out 1.8s ease-out infinite;
+}
