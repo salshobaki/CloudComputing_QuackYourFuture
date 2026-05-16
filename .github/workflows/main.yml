@@ -35,22 +35,19 @@ jobs:
             --push \
             .
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: 54.205.242.201
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            aws ecr get-login-password --region us-east-1 | \
-              docker login --username AWS --password-stdin \
-              855374748771.dkr.ecr.us-east-1.amazonaws.com
-            docker pull 855374748771.dkr.ecr.us-east-1.amazonaws.com/quackurfuture:latest
-            docker stop quackurfuture || true
-            docker rm quackurfuture || true
-            docker run -d \
-              --name quackurfuture \
-              --restart unless-stopped \
-              -p 80:3000 \
-              -e AWS_REGION=us-east-1 \
-              855374748771.dkr.ecr.us-east-1.amazonaws.com/quackurfuture:latest
+      - name: Deploy to EC2 via SSM
+        run: |
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=quackurfuture-server" \
+            --query "Reservations[0].Instances[0].InstanceId" \
+            --output text)
+          aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands='[
+              "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 855374748771.dkr.ecr.us-east-1.amazonaws.com",
+              "docker pull 855374748771.dkr.ecr.us-east-1.amazonaws.com/quackurfuture:latest",
+              "docker stop quackurfuture || true",
+              "docker rm quackurfuture || true",
+              "docker run -d --name quackurfuture --restart unless-stopped -p 80:3000 -e AWS_REGION=us-east-1 855374748771.dkr.ecr.us-east-1.amazonaws.com/quackurfuture:latest"
+            ]'
