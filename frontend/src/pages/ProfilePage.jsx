@@ -51,6 +51,9 @@ function BasicInfo({ data, onChange }) {
         <Field label="Email">
           <input className={inputCls} type="email" value={data.email} onChange={set('email')} placeholder="jane@example.com" />
         </Field>
+        <Field label="Phone Number">
+          <input className={inputCls} type="tel" value={data.phone} onChange={set('phone')} placeholder="+1 (555) 000-0000" />
+        </Field>
       </div>
       <div className="mt-4">
         <Field label="Summary">
@@ -244,7 +247,7 @@ function Toast({ onDone }) {
 
 export default function ProfilePage() {
   const [basicInfo, setBasicInfo] = useState({
-    fullName: '', jobTitle: '', email: '', summary: '',
+    fullName: '', jobTitle: '', email: '', phone: '', summary: '',
   });
   const [experience, setExperience] = useState([]);
   const [education, setEducation] = useState([]);
