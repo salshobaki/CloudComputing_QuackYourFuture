@@ -58,6 +58,63 @@ Resources:
             Path:  /upload-cv
             Method: POST
 
+  # ── getProfile ──────────────────────────────────────────────────────────────
+  GetProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: quackurfuture-getProfile
+      Handler: getProfile.handler
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+        - S3ReadPolicy:
+            BucketName: quackurfuture-profiles
+      Events:
+        GetProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref QuackApi
+            Path:  /get-profile
+            Method: GET
+
+  # ── saveProfile ─────────────────────────────────────────────────────────────
+  SaveProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: quackurfuture-saveProfile
+      Handler: saveProfile.handler
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+        - S3CrudPolicy:
+            BucketName: quackurfuture-profiles
+      Events:
+        SaveProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref QuackApi
+            Path:  /save-profile
+            Method: POST
+
+  # ── getHistory ──────────────────────────────────────────────────────────────
+  GetHistoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: quackurfuture-getHistory
+      Handler: getHistory.handler
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+        - S3ReadPolicy:
+            BucketName: quackurfuture-outputs
+      Events:
+        GetHistory:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref QuackApi
+            Path:  /get-history
+            Method: GET
+
   # ── tailorCV ────────────────────────────────────────────────────────────────
   TailorCVFunction:
     Type: AWS::Serverless::Function

@@ -7,6 +7,6 @@ architecture = "x86_64"
 handler = "uploadCV.handler"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["UploadCVFunction", "TailorCVFunction"]
+functions = ["UploadCVFunction", "GetProfileFunction", "SaveProfileFunction", "GetHistoryFunction", "TailorCVFunction"]
 
 [layer_build_definitions]

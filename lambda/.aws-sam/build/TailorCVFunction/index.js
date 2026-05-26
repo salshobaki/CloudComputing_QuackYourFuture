@@ -1,9 +1,11 @@
 "use strict";
 
-// Entry point re-exports — each function is configured in AWS to point at its
-// own file (uploadCV.handler / tailorCV.handler). This file exists for local
-// testing convenience only.
-const { handler: uploadCV } = require("./uploadCV");
-const { handler: tailorCV } = require("./tailorCV");
+// Re-exports for local testing. Each function is deployed separately in AWS
+// and configured to point at its own file (e.g. uploadCV.handler).
+const { handler: uploadCV }    = require("./uploadCV");
+const { handler: tailorCV }    = require("./tailorCV");
+const { handler: getProfile }  = require("./getProfile");
+const { handler: saveProfile } = require("./saveProfile");
+const { handler: getHistory }  = require("./getHistory");
 
-module.exports = { uploadCV, tailorCV };
+module.exports = { uploadCV, tailorCV, getProfile, saveProfile, getHistory };
