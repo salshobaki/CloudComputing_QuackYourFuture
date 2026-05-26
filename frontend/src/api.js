@@ -28,3 +28,32 @@ export async function tailorCV(profileKey, jobDescription) {
     body:    JSON.stringify({ profileKey, jobDescription }),
   });
 }
+
+// ─── localStorage-backed profile (no dedicated Lambda endpoint needed) ────────
+
+export async function getProfile() {
+  const stored = localStorage.getItem('quack_profile');
+  if (!stored) return { empty: true };
+  return JSON.parse(stored);
+}
+
+export async function saveProfile(payload) {
+  localStorage.setItem('quack_profile', JSON.stringify(payload));
+  return { success: true };
+}
+
+// ─── generateCV: thin wrapper kept for GeneratePage compatibility ─────────────
+
+export async function generateCV(jobDescription) {
+  const profileKey = localStorage.getItem('qyf_profileKey') || 'default-user/profile.json';
+  const data = await tailorCV(profileKey, jobDescription);
+  return {
+    score:         data.fitScore,
+    justification: data.justification,
+    downloadUrl:   data.downloadUrl,
+  };
+}
+
+export async function getHistory() {
+  return { history: [] };
+}
