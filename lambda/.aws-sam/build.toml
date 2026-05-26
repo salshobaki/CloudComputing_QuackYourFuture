@@ -7,6 +7,6 @@ architecture = "x86_64"
 handler = "uploadCV.handler"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["UploadCVFunction", "GetProfileFunction", "SaveProfileFunction", "GetHistoryFunction", "TailorCVFunction"]
+functions = ["QuackApiFunction"]
 
 [layer_build_definitions]

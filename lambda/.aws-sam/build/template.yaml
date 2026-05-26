@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "QuackYourFuture \u2014 uploadCV and tailorCV Lambda functions + HTTP\
-  \ API"
+Description: "QuackYourFuture \u2014 single Serverless Express Lambda + HTTP API"
 Globals:
   Function:
     Runtime: nodejs20.x
@@ -30,119 +29,32 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       StageName: prod
-  UploadCVFunction:
+  QuackApiFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: quackurfuture-uploadCV
-      Handler: uploadCV.handler
+      FunctionName: quackurfuture-api
+      Handler: server.handler
       Timeout: 120
       MemorySize: 1024
       Policies:
       - S3CrudPolicy:
           BucketName: quackurfuture-profiles
-      - AWSSecretsManagerGetSecretValuePolicy:
-          SecretArn:
-            Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:quackurfuture/API-key*
-      Events:
-        UploadCV:
-          Type: HttpApi
-          Properties:
-            ApiId:
-              Ref: QuackApi
-            Path: /upload-cv
-            Method: POST
-      CodeUri: UploadCVFunction
-    Metadata:
-      SamResourceId: UploadCVFunction
-  GetProfileFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: quackurfuture-getProfile
-      Handler: getProfile.handler
-      Timeout: 30
-      MemorySize: 256
-      Policies:
-      - S3ReadPolicy:
-          BucketName: quackurfuture-profiles
-      Events:
-        GetProfile:
-          Type: HttpApi
-          Properties:
-            ApiId:
-              Ref: QuackApi
-            Path: /get-profile
-            Method: GET
-      CodeUri: GetProfileFunction
-    Metadata:
-      SamResourceId: GetProfileFunction
-  SaveProfileFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: quackurfuture-saveProfile
-      Handler: saveProfile.handler
-      Timeout: 30
-      MemorySize: 256
-      Policies:
-      - S3CrudPolicy:
-          BucketName: quackurfuture-profiles
-      Events:
-        SaveProfile:
-          Type: HttpApi
-          Properties:
-            ApiId:
-              Ref: QuackApi
-            Path: /save-profile
-            Method: POST
-      CodeUri: SaveProfileFunction
-    Metadata:
-      SamResourceId: SaveProfileFunction
-  GetHistoryFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: quackurfuture-getHistory
-      Handler: getHistory.handler
-      Timeout: 30
-      MemorySize: 256
-      Policies:
-      - S3ReadPolicy:
-          BucketName: quackurfuture-outputs
-      Events:
-        GetHistory:
-          Type: HttpApi
-          Properties:
-            ApiId:
-              Ref: QuackApi
-            Path: /get-history
-            Method: GET
-      CodeUri: GetHistoryFunction
-    Metadata:
-      SamResourceId: GetHistoryFunction
-  TailorCVFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: quackurfuture-tailorCV
-      Handler: tailorCV.handler
-      Timeout: 120
-      MemorySize: 512
-      Policies:
-      - S3ReadPolicy:
-          BucketName: quackurfuture-profiles
       - S3CrudPolicy:
           BucketName: quackurfuture-outputs
       - AWSSecretsManagerGetSecretValuePolicy:
           SecretArn:
             Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:quackurfuture/API-key*
       Events:
-        TailorCV:
+        ProxyAll:
           Type: HttpApi
           Properties:
             ApiId:
               Ref: QuackApi
-            Path: /tailor-cv
-            Method: POST
-      CodeUri: TailorCVFunction
+            Path: /{proxy+}
+            Method: ANY
+      CodeUri: QuackApiFunction
     Metadata:
-      SamResourceId: TailorCVFunction
+      SamResourceId: QuackApiFunction
 Outputs:
   ApiUrl:
     Description: "Base URL \u2014 set this as VITE_API_URL in Vercel"
