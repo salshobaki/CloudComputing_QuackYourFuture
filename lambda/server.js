@@ -9,6 +9,7 @@ const { S3Client, GetObjectCommand, PutObjectCommand, ListObjectsV2Command } = r
 const { getSignedUrl }  = require("@aws-sdk/s3-request-presigner");
 const { Document, Paragraph, TextRun, HeadingLevel, Packer, AlignmentType } = require("docx");
 const OpenAI = require("openai").default;
+const { createClient } = require("@supabase/supabase-js");
 const { getOpenAIKey, streamToString } = require("./shared");
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -16,11 +17,35 @@ const { getOpenAIKey, streamToString } = require("./shared");
 const PROFILES_BUCKET = process.env.PROFILES_BUCKET || "quackurfuture-profiles";
 const OUTPUTS_BUCKET  = process.env.OUTPUTS_BUCKET  || "quackurfuture-outputs";
 const REGION          = process.env.AWS_REGION       || "us-east-1";
-const DEFAULT_USER    = "default-user";
 const SIGNED_URL_TTL  = 3600;
 
 const s3     = new S3Client({ region: REGION });
 const upload = multer({ storage: multer.memoryStorage() });
+
+// ─── Supabase auth ────────────────────────────────────────────────────────────
+
+let _supabase;
+function getSupabase() {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+  }
+  return _supabase;
+}
+
+async function requireAuth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header?.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Missing auth token." });
+  }
+  const { data: { user }, error } = await getSupabase().auth.getUser(header.slice(7));
+  if (error || !user) return res.status(401).json({ error: "Invalid or expired token." });
+  req.user = user;
+  next();
+}
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 
@@ -30,11 +55,11 @@ app.use(express.json());
 
 // ─── GET /get-profile ─────────────────────────────────────────────────────────
 
-app.get("/get-profile", async (req, res) => {
+app.get("/get-profile", requireAuth, async (req, res) => {
   try {
     const response = await s3.send(new GetObjectCommand({
       Bucket: PROFILES_BUCKET,
-      Key:    `${DEFAULT_USER}/profile.json`,
+      Key:    `${req.user.id}/profile.json`,
     }));
     const text = await streamToString(response.Body);
     res.json(JSON.parse(text));
@@ -47,11 +72,11 @@ app.get("/get-profile", async (req, res) => {
 
 // ─── POST /save-profile ───────────────────────────────────────────────────────
 
-app.post("/save-profile", async (req, res) => {
+app.post("/save-profile", requireAuth, async (req, res) => {
   try {
     await s3.send(new PutObjectCommand({
       Bucket:      PROFILES_BUCKET,
-      Key:         `${DEFAULT_USER}/profile.json`,
+      Key:         `${req.user.id}/profile.json`,
       Body:        JSON.stringify(req.body),
       ContentType: "application/json",
     }));
@@ -64,11 +89,11 @@ app.post("/save-profile", async (req, res) => {
 
 // ─── POST /upload-cv ──────────────────────────────────────────────────────────
 
-app.post("/upload-cv", upload.single("file"), async (req, res) => {
+app.post("/upload-cv", requireAuth, upload.single("file"), async (req, res) => {
   const file = req.file;
   if (!file) return res.status(400).json({ error: "No file received. Form field name must be 'file'." });
 
-  const userId = req.body.userId || DEFAULT_USER;
+  const userId = req.user.id;
   const ext    = file.mimetype.includes("pdf") ? "pdf" : "docx";
   const rawKey = `${userId}/cv-original.${ext}`;
 
@@ -116,11 +141,12 @@ app.post("/upload-cv", upload.single("file"), async (req, res) => {
 
 // ─── POST /tailor-cv ──────────────────────────────────────────────────────────
 
-app.post("/tailor-cv", async (req, res) => {
+app.post("/tailor-cv", requireAuth, async (req, res) => {
   const { profileKey, jobDescription } = req.body;
 
   if (!profileKey)     return res.status(400).json({ error: "Missing required field: profileKey" });
   if (!jobDescription) return res.status(400).json({ error: "Missing required field: jobDescription" });
+  if (!profileKey.startsWith(req.user.id + "/")) return res.status(403).json({ error: "Forbidden." });
 
   // 1. Fetch profile
   let cvProfile;
@@ -172,9 +198,9 @@ app.post("/tailor-cv", async (req, res) => {
 
 // ─── GET /get-history ─────────────────────────────────────────────────────────
 
-app.get("/get-history", async (req, res) => {
+app.get("/get-history", requireAuth, async (req, res) => {
   try {
-    const response = await s3.send(new ListObjectsV2Command({ Bucket: OUTPUTS_BUCKET, Prefix: `${DEFAULT_USER}/` }));
+    const response = await s3.send(new ListObjectsV2Command({ Bucket: OUTPUTS_BUCKET, Prefix: `${req.user.id}/` }));
     const history  = (response.Contents ?? []).map((obj) => ({ key: obj.Key, lastModified: obj.LastModified, size: obj.Size }));
     res.json({ history });
   } catch (err) {
@@ -278,6 +304,7 @@ async function buildDocx(tailoredText, candidateName) {
 // ─── Export ───────────────────────────────────────────────────────────────────
 
 module.exports.handler = serverless(app, {
+  basePath: "/prod",
   binary: [
     "multipart/form-data",
     "application/octet-stream",

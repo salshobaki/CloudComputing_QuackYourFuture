@@ -2,6 +2,13 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: QuackYourFuture — single Serverless Express Lambda + HTTP API
 
+# ─── Parameters ───────────────────────────────────────────────────────────────
+Parameters:
+  SupabaseUrl:
+    Type: String
+  SupabaseServiceRoleKey:
+    Type: String
+
 # ─── Shared defaults ──────────────────────────────────────────────────────────
 Globals:
   Function:
@@ -11,9 +18,11 @@ Globals:
     Environment:
       Variables:
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-        PROFILES_BUCKET: quackurfuture-profiles
-        OUTPUTS_BUCKET:  quackurfuture-outputs
-        SECRET_NAME:     quackurfuture/API-key
+        PROFILES_BUCKET:            quackurfuture-profiles
+        OUTPUTS_BUCKET:             quackurfuture-outputs
+        SECRET_NAME:                quackurfuture/API-key
+        SUPABASE_URL:               !Ref SupabaseUrl
+        SUPABASE_SERVICE_ROLE_KEY:  !Ref SupabaseServiceRoleKey
   HttpApi:
     CorsConfiguration:
       AllowOrigins:

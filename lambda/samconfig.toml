@@ -8,6 +8,7 @@ region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
+parameter_overrides = "SupabaseUrl=https://jipeknbbtjivndsdeqfi.supabase.co SupabaseServiceRoleKey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppcGVrbmJidGppdm5kc2RlcWZpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTc5MzU5MSwiZXhwIjoyMDk1MzY5NTkxfQ.099ZDMmWyrI3l8_yXqR5bFmQH4jslQ-OE5p7PVFK_k4"
 
 [default.global.parameters]
 region = "us-east-1"

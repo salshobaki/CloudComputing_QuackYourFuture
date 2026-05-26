@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: "QuackYourFuture \u2014 single Serverless Express Lambda + HTTP API"
+Parameters:
+  SupabaseUrl:
+    Type: String
+  SupabaseServiceRoleKey:
+    Type: String
 Globals:
   Function:
     Runtime: nodejs20.x
@@ -13,6 +18,10 @@ Globals:
         PROFILES_BUCKET: quackurfuture-profiles
         OUTPUTS_BUCKET: quackurfuture-outputs
         SECRET_NAME: quackurfuture/API-key
+        SUPABASE_URL:
+          Ref: SupabaseUrl
+        SUPABASE_SERVICE_ROLE_KEY:
+          Ref: SupabaseServiceRoleKey
   HttpApi:
     CorsConfiguration:
       AllowOrigins:

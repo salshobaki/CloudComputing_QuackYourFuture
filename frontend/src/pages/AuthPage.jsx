@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 function RubberDuck() {
   return (
@@ -54,11 +55,27 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/profile');
+    setLoading(true);
+    setError('');
+
+    try {
+      const { error: authError } = isLogin
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password });
+
+      if (authError) throw authError;
+      navigate('/profile');
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -96,7 +113,7 @@ export default function AuthPage() {
           {/* Toggle tabs */}
           <div className="flex rounded-xl bg-blue-50 p-1 mb-6 border border-blue-100">
             <button
-              onClick={() => setIsLogin(true)}
+              onClick={() => { setIsLogin(true); setError(''); }}
               className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${
                 isLogin
                   ? 'bg-yellow-400 text-blue-900 shadow-sm'
@@ -106,7 +123,7 @@ export default function AuthPage() {
               🦆 Log In
             </button>
             <button
-              onClick={() => setIsLogin(false)}
+              onClick={() => { setIsLogin(false); setError(''); }}
               className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${
                 !isLogin
                   ? 'bg-yellow-400 text-blue-900 shadow-sm'
@@ -143,18 +160,38 @@ export default function AuthPage() {
               />
             </div>
 
+            {error && (
+              <p className="text-sm text-red-500 flex items-center gap-1.5">
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                {error}
+              </p>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-blue-900 font-extrabold py-3 rounded-xl text-sm transition-all mt-2 shadow-lg hover:shadow-yellow-400/30"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 disabled:bg-yellow-200 disabled:cursor-not-allowed text-blue-900 font-extrabold py-3 rounded-xl text-sm transition-all mt-2 shadow-lg hover:shadow-yellow-400/30"
             >
-              {isLogin ? '🦆 Quack In' : '🐣 Join the Pond'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-blue-900" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  {isLogin ? 'Quacking in...' : 'Joining the pond...'}
+                </>
+              ) : (
+                isLogin ? '🦆 Quack In' : '🐣 Join the Pond'
+              )}
             </button>
           </form>
 
           <p className="text-center text-sm text-blue-400 mt-6">
             {isLogin ? "New to the pond?" : 'Already a duck?'}{' '}
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => { setIsLogin(!isLogin); setError(''); }}
               className="text-blue-700 font-bold hover:underline"
             >
               {isLogin ? 'Sign up' : 'Log in'}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 function DuckLogo() {
   return (
@@ -16,12 +17,19 @@ function DuckLogo() {
 }
 
 export default function Navbar() {
+  const navigate = useNavigate();
+
   const linkClass = ({ isActive }) =>
     `text-sm font-semibold px-4 py-2 rounded-lg transition-all ${
       isActive
         ? 'bg-yellow-400 text-blue-900 shadow-sm'
         : 'text-yellow-100 hover:text-yellow-400 hover:bg-blue-700'
     }`;
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
 
   return (
     <nav className="bg-blue-900 border-b border-blue-800 shadow-lg">
@@ -33,9 +41,15 @@ export default function Navbar() {
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <NavLink to="/profile" className={linkClass}>Profile</NavLink>
+          <NavLink to="/profile"  className={linkClass}>Profile</NavLink>
           <NavLink to="/generate" className={linkClass}>Generate</NavLink>
-          <NavLink to="/history" className={linkClass}>History</NavLink>
+          <NavLink to="/history"  className={linkClass}>History</NavLink>
+          <button
+            onClick={handleSignOut}
+            className="text-sm font-semibold px-4 py-2 rounded-lg transition-all text-yellow-100 hover:text-yellow-400 hover:bg-blue-700 ml-2"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     </nav>
