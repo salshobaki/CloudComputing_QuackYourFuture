@@ -1,5 +1,6 @@
 {
   "outputDirectory": "dist",
+  "installCommand": "npm install --include=dev",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
