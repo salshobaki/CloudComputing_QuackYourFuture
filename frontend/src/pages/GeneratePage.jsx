@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { tailorCV } from '../api';
-
-const PROFILE_KEY = 'qyf_profileKey';
+import { generateCV } from '../api';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -22,7 +19,12 @@ function scoreLabel(score) {
 
 function Spinner() {
   return (
-    <svg className="animate-spin h-5 w-5 text-blue-900" fill="none" viewBox="0 0 24 24">
+    <svg
+      className="animate-spin h-5 w-5 text-blue-900"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
     </svg>
@@ -46,7 +48,9 @@ function LoadingSkeleton() {
 function ScoreRing({ score }) {
   const { text, ring } = scoreColor(score);
   return (
-    <div className={`w-36 h-36 rounded-full border-8 ${ring} flex flex-col items-center justify-center mx-auto`}>
+    <div
+      className={`w-36 h-36 rounded-full border-8 ${ring} flex flex-col items-center justify-center mx-auto`}
+    >
       <span className={`text-4xl font-extrabold leading-none ${text}`}>{score}%</span>
       <span className="text-xs font-bold text-gray-400 mt-1">Fit Score</span>
     </div>
@@ -54,19 +58,24 @@ function ScoreRing({ score }) {
 }
 
 function ResultCard({ result, onReset }) {
-  const { text: scoreText, bg } = scoreColor(result.fitScore);
+  const { text: scoreText, bg } = scoreColor(result.score);
+  const label = scoreLabel(result.score);
 
   return (
-    <div className="mt-6 bg-white rounded-2xl shadow-sm border-2 border-yellow-200 overflow-hidden">
+    <div className="mt-6 bg-white rounded-2xl shadow-sm border-2 border-yellow-200 overflow-hidden transition-all">
+      {/* Score header */}
       <div className={`${bg} px-6 py-8 flex flex-col items-center gap-3`}>
-        <ScoreRing score={result.fitScore} />
+        <ScoreRing score={result.score} />
         <span className={`text-sm font-bold ${scoreText} uppercase tracking-wide`}>
-          {scoreLabel(result.fitScore)}
+          {label}
         </span>
       </div>
 
+      {/* Body */}
       <div className="px-6 py-6 space-y-6">
-        <p className="text-center text-gray-600 text-sm leading-relaxed">{result.justification}</p>
+        <p className="text-center text-gray-600 text-sm leading-relaxed">
+          {result.justification}
+        </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a
@@ -96,23 +105,21 @@ function ResultCard({ result, onReset }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function GeneratePage() {
-  const profileKey = localStorage.getItem(PROFILE_KEY);
-
   const [jobDescription, setJobDescription] = useState('');
-  const [status, setStatus]     = useState('idle');
-  const [result, setResult]     = useState(null);
+  const [status, setStatus]   = useState('idle');
+  const [result, setResult]   = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!jobDescription.trim() || !profileKey) return;
+    if (!jobDescription.trim()) return;
 
     setStatus('loading');
     setResult(null);
     setErrorMsg('');
 
     try {
-      const data = await tailorCV(profileKey, jobDescription);
+      const data = await generateCV(jobDescription);
       setResult(data);
       setStatus('success');
     } catch (err) {
@@ -128,25 +135,9 @@ export default function GeneratePage() {
     setErrorMsg('');
   };
 
-  // No profile uploaded yet
-  if (!profileKey) {
-    return (
-      <main className="max-w-2xl mx-auto px-4 py-10 flex flex-col items-center justify-center min-h-[50vh] text-center gap-4">
-        <span className="text-5xl">🥚</span>
-        <h2 className="text-xl font-extrabold text-blue-900">No profile yet</h2>
-        <p className="text-blue-500 text-sm">Upload your CV first so we can tailor it for you.</p>
-        <Link
-          to="/profile"
-          className="mt-2 bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-extrabold px-6 py-3 rounded-xl text-sm transition-all shadow-lg hover:shadow-yellow-400/30"
-        >
-          🦆 Upload My CV
-        </Link>
-      </main>
-    );
-  }
-
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
+      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-blue-900 flex items-center gap-2">
           <span>🐣</span> Hatch Your CV
@@ -156,9 +147,16 @@ export default function GeneratePage() {
         </p>
       </div>
 
-      <div className={`transition-all duration-500 overflow-hidden ${status === 'success' ? 'max-h-0 opacity-0' : 'max-h-[600px] opacity-100'}`}>
+      {/* Input section — collapses when success */}
+      <div
+        className={`transition-all duration-500 overflow-hidden ${
+          status === 'success' ? 'max-h-0 opacity-0' : 'max-h-[600px] opacity-100'
+        }`}
+      >
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border-2 border-yellow-200 p-6">
-          <label className="block text-sm font-bold text-blue-900 mb-2">Job Description</label>
+          <label className="block text-sm font-bold text-blue-900 mb-2">
+            Job Description
+          </label>
           <textarea
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
@@ -168,6 +166,7 @@ export default function GeneratePage() {
             className="w-full rounded-xl border-2 border-blue-100 bg-blue-50/40 px-4 py-3 text-sm text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition disabled:bg-amber-50 disabled:text-gray-400"
           />
 
+          {/* Error message */}
           {status === 'error' && (
             <p className="mt-3 text-sm text-red-500 flex items-center gap-1.5">
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -183,14 +182,20 @@ export default function GeneratePage() {
             className="mt-4 w-full flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 disabled:bg-yellow-200 disabled:cursor-not-allowed text-blue-900 font-extrabold py-3 rounded-xl text-sm transition-all shadow-lg hover:shadow-yellow-400/30"
           >
             {status === 'loading' ? (
-              <><Spinner /> Quacking up your CV...</>
-            ) : '🦆 Generate CV'}
+              <>
+                <Spinner />
+                Quacking up your CV...
+              </>
+            ) : (
+              '🦆 Generate CV'
+            )}
           </button>
         </form>
 
         {status === 'loading' && <LoadingSkeleton />}
       </div>
 
+      {/* Result card */}
       {status === 'success' && result && (
         <ResultCard result={result} onReset={handleReset} />
       )}
