@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "QuackYourFuture \u2014 uploadCV and tailorCV Lambda functions + HTTP\
+  \ API"
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Architectures:
+    - x86_64
+    CodeUri: .
+    Environment:
+      Variables:
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+        PROFILES_BUCKET: quackurfuture-profiles
+        OUTPUTS_BUCKET: quackurfuture-outputs
+        SECRET_NAME: quackurfuture/API-key
+  HttpApi:
+    CorsConfiguration:
+      AllowOrigins:
+      - '*'
+      AllowHeaders:
+      - Content-Type
+      - Authorization
+      AllowMethods:
+      - GET
+      - POST
+      - OPTIONS
+Resources:
+  QuackApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+  UploadCVFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: quackurfuture-uploadCV
+      Handler: uploadCV.handler
+      Timeout: 120
+      MemorySize: 1024
+      Policies:
+      - S3CrudPolicy:
+          BucketName: quackurfuture-profiles
+      - AWSSecretsManagerGetSecretValuePolicy:
+          SecretArn:
+            Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:quackurfuture/API-key*
+      Events:
+        UploadCV:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: QuackApi
+            Path: /upload-cv
+            Method: POST
+      CodeUri: UploadCVFunction
+    Metadata:
+      SamResourceId: UploadCVFunction
+  TailorCVFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: quackurfuture-tailorCV
+      Handler: tailorCV.handler
+      Timeout: 120
+      MemorySize: 512
+      Policies:
+      - S3ReadPolicy:
+          BucketName: quackurfuture-profiles
+      - S3CrudPolicy:
+          BucketName: quackurfuture-outputs
+      - AWSSecretsManagerGetSecretValuePolicy:
+          SecretArn:
+            Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:quackurfuture/API-key*
+      Events:
+        TailorCV:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: QuackApi
+            Path: /tailor-cv
+            Method: POST
+      CodeUri: TailorCVFunction
+    Metadata:
+      SamResourceId: TailorCVFunction
+Outputs:
+  ApiUrl:
+    Description: "Base URL \u2014 set this as VITE_API_URL in Vercel"
+    Value:
+      Fn::Sub: https://${QuackApi}.execute-api.${AWS::Region}.amazonaws.com/prod
+  UploadCVEndpoint:
+    Description: 'POST multipart/form-data  field: file (PDF/DOCX)'
+    Value:
+      Fn::Sub: https://${QuackApi}.execute-api.${AWS::Region}.amazonaws.com/prod/upload-cv
+  TailorCVEndpoint:
+    Description: 'POST application/json  body: { profileKey, jobDescription }'
+    Value:
+      Fn::Sub: https://${QuackApi}.execute-api.${AWS::Region}.amazonaws.com/prod/tailor-cv
